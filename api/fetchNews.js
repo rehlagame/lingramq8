@@ -8,8 +8,7 @@ export default async function handler(req, res) {
     // Instead of searching, we get Top Headlines from specific tech sources.
     // This is more likely to work on the free NewsAPI plan from a server.
     const sources = 'the-verge,techcrunch,ars-technica,ign,polygon';
-    const url = `https://newsapi.org/v2/top-headlines?sources=${sources}&pageSize=20`;
-
+    const url = `https://newsapi.org/v2/top-headlines?country=sa&category=technology&pageSize=20`;
     try {
         const newsResponse = await fetch(url, {
             headers: {
