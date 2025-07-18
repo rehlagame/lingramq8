@@ -2,12 +2,13 @@
 // It will be accessible at your-site.vercel.app/api/fetchNews
 
 export default async function handler(req, res) {
-    // Get the secret API key from environment variables
     const API_KEY = process.env.NEWS_API_KEY;
 
-    // Construct the query to get tech and gaming news in Arabic
-    const query = encodeURIComponent('ابل أو مايكروسوفت أو جوجل أو انفيديا أو بلايستيشن أو اكسبوكس أو نينتندو أو ألعاب الفيديو أو تقنية');
-    const url = `https://newsapi.org/v2/everything?q=${query}&language=ar&sortBy=publishedAt&pageSize=12`;
+    // --- NEW, MORE RELIABLE URL ---
+    // Instead of searching, we get Top Headlines from specific tech sources.
+    // This is more likely to work on the free NewsAPI plan from a server.
+    const sources = 'the-verge,techcrunch,ars-technica,ign,polygon';
+    const url = `https://newsapi.org/v2/top-headlines?sources=${sources}&pageSize=20`;
 
     try {
         const newsResponse = await fetch(url, {
@@ -17,17 +18,22 @@ export default async function handler(req, res) {
         });
 
         if (!newsResponse.ok) {
-            // If NewsAPI returns an error, forward it
+            const errorBody = await newsResponse.json();
+            console.error('NewsAPI Error:', errorBody);
             throw new Error(`NewsAPI error: ${newsResponse.statusText}`);
         }
 
         const newsData = await newsResponse.json();
 
+        // --- IMPORTANT CHECK ---
+        // Log how many articles we received.
+        console.log(`Successfully fetched ${newsData.articles.length} articles.`);
+
         // Send the articles back to the front-end
         res.status(200).json(newsData);
 
     } catch (error) {
-        console.error("Error fetching news:", error);
-        res.status(500).json({ message: "Failed to fetch news" });
+        console.error("Error inside fetchNews function:", error);
+        res.status(500).json({ message: "Failed to fetch news", error: error.message });
     }
 }
