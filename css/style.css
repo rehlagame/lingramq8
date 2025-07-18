@@ -114,4 +114,40 @@ main { padding-top: 40px; min-height: 70vh; }
     .logo-img { height: 40px; }
     .news-grid { grid-template-columns: 1fr; }
     .article-title { font-size: 1.8rem; }
+    /* --- Styling for the new elements in Article Page --- */
+
+    .article-meta span {
+        display: inline-block;
+        margin: 0 5px;
+    }
+
+    .article-summary {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #34495e;
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .read-more-container {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .read-more-btn {
+        display: inline-block;
+        background-color: var(--accent-red);
+        color: #fff;
+        padding: 12px 25px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .read-more-btn:hover {
+        background-color: #b71c23; /* Darker red on hover */
+        transform: translateY(-2px);
+    }
 }
