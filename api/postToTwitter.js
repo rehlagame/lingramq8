@@ -1,61 +1,72 @@
 // File: /api/postToTwitter.js
+// The final, robust version of the automated Twitter posting function.
 
 import { kv } from '@vercel/kv';
 import { TwitterApi } from 'twitter-api-v2';
 
-// The keywords we are looking for to determine an "important" article
-const IMPORTANT_KEYWORDS = ['إطلاق', 'حصريا', 'رسميا', 'رسميًا', 'لأول مرة', 'الكشف عن', 'تعلن'];
+// Keywords to identify an important article
+const IMPORTANT_KEYWORDS = ['إطلاق', 'حصريا', 'رسميا', 'رسميًا', 'لأول مرة', 'الكشف عن','اطلاق',  'تعلن'];
+const LAST_POSTED_KEY = 'last_posted_url'; // Use a constant for the database key
 
 // Main handler for the Vercel Cron Job
 export default async function handler(req, res) {
-    // --- 1. Security Check: Ensure this is triggered by Vercel Cron or an authorized user ---
+    // 1. Security Check: Only allow Vercel's Cron or an authorized user to run this.
     if (req.headers['authorization'] !== `Bearer ${process.env.CRON_SECRET}`) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
 
     try {
-        // --- 2. Fetch latest news from NewsAPI ---
-        console.log("Cron job started: Fetching news...");
-        const newsData = await fetchNews();
+        // 2. Fetch latest news from NewsAPI
+        console.log("CRON JOB: Task started. Fetching news...");
+        const articles = await fetchNews();
 
-        if (!newsData || newsData.length === 0) {
-            console.log("No news found to process.");
-            return res.status(200).json({ message: "No news found." });
+        if (!articles || articles.length === 0) {
+            console.log("CRON JOB: No news found from API. Task finished.");
+            return res.status(200).json({ message: "No news found to process." });
         }
 
-        // --- 3. Find the best article to post ---
-        console.log("Analyzing articles to find the best one...");
-        const bestArticle = findBestArticle(newsData);
+        // 3. Find the best article to post
+        console.log(`CRON JOB: Analyzing ${articles.length} articles...`);
+        const bestArticle = findBestArticle(articles);
 
         if (!bestArticle) {
-            console.log("No new, important article found to post.");
-            return res.status(200).json({ message: "No new, important article found." });
+            console.log("CRON JOB: No suitable article found. Task finished.");
+            return res.status(200).json({ message: "No suitable article found." });
         }
 
-        // --- 4. Check if we've already posted this article ---
-        const lastPostedUrl = await kv.get('last_posted_url');
+        // 4. Check for duplicates to avoid re-posting
+        const lastPostedUrl = await kv.get(LAST_POSTED_KEY);
         if (lastPostedUrl === bestArticle.url) {
-            console.log("Best article found has already been posted. Skipping.");
+            console.log(`CRON JOB: Best article (${bestArticle.title}) was already posted. Skipping.`);
             return res.status(200).json({ message: "Article already posted." });
         }
 
-        // --- 5. Post to Twitter ---
-        console.log(`Posting to Twitter: "${bestArticle.title}"`);
+        // 5. Post the selected article to Twitter
+        console.log(`CRON JOB: Found new article to post: "${bestArticle.title}"`);
         await postToTwitter(bestArticle);
 
-        // --- 6. Save the URL of the posted article to prevent duplicates ---
-        await kv.set('last_posted_url', bestArticle.url);
-        console.log("Successfully posted and updated last posted URL.");
+        // 6. Save the new article's URL to the database
+        await kv.set(LAST_POSTED_KEY, bestArticle.url);
+        console.log("CRON JOB: Successfully posted to Twitter and updated KV store.");
 
         return res.status(200).json({ success: true, posted_title: bestArticle.title });
 
     } catch (error) {
-        console.error("An error occurred in the cron job:", error);
+        // Enhanced error logging for easier debugging on Vercel
+        console.error("--- CRON JOB FAILED ---");
+        console.error("Error Message:", error.message);
+        if (error.data) { // Twitter API specific errors
+            console.error("Twitter API Error Data:", error.data);
+        }
+        console.error("Error Stack:", error.stack);
+        console.error("--- END OF ERROR ---");
+
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-// Helper function to fetch news from NewsAPI
+// --- Helper Functions ---
+
 async function fetchNews() {
     const API_KEY = process.env.NEWS_API_KEY;
     const keywords = 'تقنية OR ألعاب OR بلايستيشن OR اكسبوكس OR ابل OR جوجل';
@@ -63,28 +74,28 @@ async function fetchNews() {
     const url = `https://newsapi.org/v2/everything?q=${query}&language=ar&sortBy=publishedAt&pageSize=10`;
 
     const response = await fetch(url, { headers: { 'X-Api-Key': API_KEY } });
-    if (!response.ok) throw new Error("Failed to fetch from NewsAPI");
+    if (!response.ok) {
+        // Log the error response from NewsAPI for more details
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch from NewsAPI. Status: ${response.status}. Body: ${errorText}`);
+    }
 
     const data = await response.json();
     return data.articles;
 }
 
-// Helper function to find the most "important" article
 function findBestArticle(articles) {
-    // First, look for an article with important keywords
-    for (const article of articles) {
-        const title = article.title || '';
-        if (IMPORTANT_KEYWORDS.some(keyword => title.includes(keyword))) {
-            return article; // Return the first article that matches
-        }
-    }
-    // If no "important" article is found, return the newest one (the first in the list)
-    return articles[0];
+    // First, find an article that matches our important keywords
+    const importantArticle = articles.find(article =>
+        article.title && IMPORTANT_KEYWORDS.some(keyword => article.title.includes(keyword))
+    );
+    if (importantArticle) return importantArticle;
+
+    // If no "important" article is found, fall back to the newest one
+    return articles[0] || null;
 }
 
-// Helper function to post the tweet
 async function postToTwitter(article) {
-    // Initialize Twitter client with your credentials
     const twitterClient = new TwitterApi({
         appKey: process.env.TWITTER_API_KEY,
         appSecret: process.env.TWITTER_API_SECRET,
@@ -92,15 +103,22 @@ async function postToTwitter(article) {
         accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
     });
 
-    // Construct the tweet text
+    // Truncate the title to avoid exceeding Twitter's character limit
+    // Max length is approx 150 chars to leave room for other text and the link
+    const maxTitleLength = 150;
+    const truncatedTitle = article.title.length > maxTitleLength
+        ? article.title.substring(0, maxTitleLength) + '...'
+        : article.title;
+
     const tweetText = `
-🚨 خبر جديد | ${article.title}
+🚨 خبر جديد | ${truncatedTitle}
 
 #LingramQ8 #اخبار_تقنية #العاب
 
 اقرأ المزيد: ${article.url}
   `;
 
-    // Post the tweet
-    await twitterClient.v2.tweet(tweetText);
+    // Use the read-write client to post a tweet
+    const rwClient = twitterClient.readWrite;
+    await rwClient.v2.tweet(tweetText);
 }
