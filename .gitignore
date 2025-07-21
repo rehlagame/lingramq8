@@ -1,23 +1,29 @@
-# Secret environment variables
-# Do not commit this file to your repository
+# Environment variables
 .env
 .env.local
-.env.*.local
+.env.production
+.env.staging
 
-# IDE-specific files and directories
-# For WebStorm, VSCode, etc.
-.idea/
-.vscode/
+# Dependencies
+node_modules/
+.npm
 
-# Node.js dependencies
-# This folder is usually very large and can be re-installed by anyone
-/node_modules
+# Logs
+logs
+*.log
 
-# Vercel-specific directory
-# This is created when you run the project locally
-.vercel/
+# Vercel
+.vercel
 
-# Operating System generated files
+# OS generated files
 .DS_Store
 Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
 plan.txt
