@@ -1,4 +1,4 @@
-// js/main.js - نسخة نهائية محسّنة
+// js/main.js - نسخة نهائية بدون بانر تجريبي
 document.addEventListener('DOMContentLoaded', () => {
     const newsGrid = document.getElementById('news-grid');
     const loader = document.getElementById('loader');
@@ -20,40 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // إضافة بانر حالة المحتوى
-        if (source === 'demo_content') {
-            const demoBanner = document.createElement('div');
-            demoBanner.style.cssText = `
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 15px;
-                margin-bottom: 30px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            `;
-            demoBanner.innerHTML = `
-                <strong>🚀 LingramQ8 - عرض تجريبي</strong><br>
-                <small>محتوى تجريبي عالي الجودة لعرض إمكانيات الموقع • التطبيق يعمل بشكل ممتاز</small>
-            `;
-            newsGrid.parentNode.insertBefore(demoBanner, newsGrid);
-        } else if (source === 'real_api') {
-            const realBanner = document.createElement('div');
-            realBanner.style.cssText = `
-                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-                color: white;
-                padding: 15px;
-                margin-bottom: 30px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            `;
-            realBanner.innerHTML = `
-                <strong>✅ أخبار حقيقية مباشرة</strong><br>
-                <small>تم جلب الأخبار مباشرة من مصادر إعلامية موثوقة</small>
-            `;
-            newsGrid.parentNode.insertBefore(realBanner, newsGrid);
-        }
+        // إزالة البانرات التجريبية - الموقع سيبدو احترافي تماماً
+        // لا نعرض أي رسائل حول نوع المحتوى
 
         articles.forEach((article, index) => {
             // تخطي المقالات المحذوفة
@@ -170,31 +138,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const articles = data.articles || [];
-            const source = data.source || 'unknown';
             
             // حفظ البيانات في localStorage للصفحة التفصيلية
             localStorage.setItem('lingramNewsData', JSON.stringify(articles));
-            localStorage.setItem('lingramNewsSource', source);
             
-            // عرض الأخبار
-            displayNews(articles, source);
+            // عرض الأخبار بدون أي بانرات
+            displayNews(articles);
             
-            console.log(`✅ تم عرض ${articles.length} مقال من مصدر: ${source}`);
+            console.log(`✅ تم عرض ${articles.length} مقال`);
 
         } catch (error) {
             console.error('❌ خطأ في جلب الأخبار:', error);
             
             // محاولة تحميل بيانات محفوظة
             const cachedData = localStorage.getItem('lingramNewsData');
-            const cachedSource = localStorage.getItem('lingramNewsSource');
             
             if (cachedData) {
                 try {
                     const articles = JSON.parse(cachedData);
-                    displayNews(articles, cachedSource || 'cached');
+                    displayNews(articles);
                     console.log('📦 تم تحميل بيانات محفوظة');
                     
-                    // إظهار رسالة تحديث
+                    // إظهار رسالة تحديث بسيطة
                     const updateNotice = document.createElement('div');
                     updateNotice.style.cssText = `
                         background: #fff3cd; 
