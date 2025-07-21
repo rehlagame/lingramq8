@@ -1,7 +1,7 @@
-// api/fetchNews.js - أخبار حقيقية فقط من NewsAPI
+// api/fetchNews.js - أخبار تقنية وألعاب فقط (بدون سياسة)
 
 export default async function handler(req, res) {
-    console.log('🟢 fetchNews API called - Real News Only');
+    console.log('🟢 fetchNews API called - Tech & Gaming Only');
     
     // إضافة CORS headers
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -27,31 +27,63 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log('🔄 Fetching real news from NewsAPI...');
+        console.log('🎮 Fetching tech & gaming news only...');
         
-        // كلمات البحث للأخبار التقنية والألعاب العربية
-        const keywords = [
-            'تقنية', 'تكنولوجيا', 'ألعاب', 'العاب', 'فيديو',
-            'آيفون', 'ايفون', 'سامسونج', 'هواوي', 'شاومي',
-            'بلايستيشن', 'اكسبوكس', 'نينتندو',
-            'ابل', 'جوجل', 'مايكروسوفت', 'انفيديا',
-            'ذكي', 'ذكاء اصطناعي', 'تطبيق', 'برنامج'
-        ].join(' OR ');
+        // كلمات بحث محددة للتقنية والألعاب فقط
+        const techKeywords = [
+            // شركات تقنية
+            'آيفون', 'ايفون', 'iPhone', 'سامسونج', 'Samsung',
+            'هواوي', 'Huawei', 'شاومي', 'Xiaomi', 'أوبو', 'Oppo',
+            'ابل', 'Apple', 'جوجل', 'Google', 'مايكروسوفت', 'Microsoft',
+            
+            // ألعاب فيديو
+            'بلايستيشن', 'PlayStation', 'اكسبوكس', 'Xbox', 'نينتندو', 'Nintendo',
+            'ألعاب فيديو', 'العاب فيديو', 'لعبة', 'gaming', 'game',
+            'FIFA', 'Call of Duty', 'Fortnite',
+            
+            // تقنيات
+            'تطبيق', 'برنامج', 'تحديث', 'إصدار جديد',
+            'ذكي', 'ذكاء اصطناعي', 'AI', 'تقنية', 'تكنولوجيا',
+            'معالج', 'رقاقة', 'شريحة', 'بطارية', 'شاشة',
+            
+            // شركات هاردوير
+            'انفيديا', 'NVIDIA', 'AMD', 'إنتل', 'Intel', 'Qualcomm',
+            
+            // منصات وخدمات
+            'يوتيوب', 'YouTube', 'تيك توك', 'TikTok', 'فيسبوك', 'Facebook',
+            'واتساب', 'WhatsApp', 'تلغرام', 'Telegram', 'انستغرام', 'Instagram'
+        ];
 
-        const query = encodeURIComponent(keywords);
+        // تجميع الكلمات مع OR
+        const query = encodeURIComponent(techKeywords.join(' OR '));
         
-        // البحث في آخر 3 أيام للحصول على أخبار أكثر
-        const fromDate = new Date(Date.now() - 3*24*60*60*1000).toISOString();
+        // البحث في آخر يومين للحصول على أخبار حديثة
+        const fromDate = new Date(Date.now() - 2*24*60*60*1000).toISOString();
         
-        const url = `https://newsapi.org/v2/everything?q=${query}&language=ar&sortBy=publishedAt&pageSize=20&from=${fromDate}`;
+        // استخدام domains محددة للمواقع التقنية
+        const techDomains = [
+            'techcrunch.com',
+            'theverge.com', 
+            'engadget.com',
+            'ign.com',
+            'gamespot.com',
+            'polygon.com',
+            'apple.com',
+            'blog.google',
+            'blogs.microsoft.com',
+            'blog.playstation.com',
+            'news.xbox.com'
+        ].join(',');
         
-        console.log('🔗 NewsAPI URL built');
+        const url = `https://newsapi.org/v2/everything?q=${query}&domains=${techDomains}&language=ar,en&sortBy=publishedAt&pageSize=25&from=${fromDate}`;
+        
+        console.log('🔗 NewsAPI URL for tech/gaming built');
         console.log('📅 Searching from:', fromDate);
 
         const response = await fetch(url, {
             headers: { 
                 'X-Api-Key': API_KEY,
-                'User-Agent': 'LingramQ8-NewsBot/1.0'
+                'User-Agent': 'LingramQ8-TechBot/1.0'
             },
         });
 
@@ -84,33 +116,61 @@ export default async function handler(req, res) {
 
         const data = await response.json();
         console.log(`📈 Raw articles received: ${data.articles?.length || 0}`);
-        console.log(`📈 Total results: ${data.totalResults || 0}`);
 
         if (!data.articles || data.articles.length === 0) {
-            console.log('⚠️ No articles returned from NewsAPI');
+            console.log('⚠️ No tech/gaming articles found');
             return res.status(404).json({
                 success: false,
-                message: "لا توجد أخبار متاحة حالياً",
-                error: "No articles found",
-                total_results: data.totalResults || 0
+                message: "لا توجد أخبار تقنية أو ألعاب متاحة حالياً",
+                error: "No tech/gaming articles found"
             });
         }
 
-        // تنظيف وفلترة الأخبار الحقيقية
+        // فلترة صارمة لإزالة الأخبار السياسية والعامة
+        const politicalKeywords = [
+            'سياسة', 'حكومة', 'رئيس', 'وزير', 'برلمان', 'انتخابات',
+            'حرب', 'صراع', 'اتفاق', 'معاهدة', 'دبلوماسية',
+            'politics', 'government', 'president', 'minister', 'parliament',
+            'war', 'conflict', 'agreement', 'treaty', 'diplomatic',
+            'ترامب', 'بايدن', 'أوباما', 'كلينتون',
+            'السعودية', 'مصر', 'سوريا', 'فلسطين', 'إسرائيل',
+            'أوكرانيا', 'روسيا', 'الصين الأمريكية'
+        ];
+
         const filteredArticles = data.articles
             .filter(article => {
-                const isValid = article.title && 
-                               article.title !== "[Removed]" && 
-                               article.description &&
-                               article.description !== "[Removed]" &&
-                               article.url &&
-                               article.source?.name;
-                
-                if (!isValid) {
-                    console.log('🗑️ Filtered out invalid article:', article.title?.substring(0, 50));
+                // تحقق من صحة البيانات الأساسية
+                const hasValidData = article.title && 
+                                   article.title !== "[Removed]" && 
+                                   article.description &&
+                                   article.description !== "[Removed]" &&
+                                   article.url &&
+                                   article.source?.name;
+
+                if (!hasValidData) return false;
+
+                // تحقق من عدم وجود كلمات سياسية
+                const titleAndDesc = (article.title + ' ' + article.description).toLowerCase();
+                const hasPoliticalContent = politicalKeywords.some(keyword => 
+                    titleAndDesc.includes(keyword.toLowerCase())
+                );
+
+                if (hasPoliticalContent) {
+                    console.log('🗑️ Filtered out political content:', article.title?.substring(0, 50));
+                    return false;
                 }
-                
-                return isValid;
+
+                // تحقق من وجود كلمات تقنية
+                const hasTechContent = techKeywords.some(keyword => 
+                    titleAndDesc.includes(keyword.toLowerCase())
+                );
+
+                if (!hasTechContent) {
+                    console.log('🗑️ Filtered out non-tech content:', article.title?.substring(0, 50));
+                    return false;
+                }
+
+                return true;
             })
             .map(article => ({
                 title: article.title,
@@ -120,27 +180,28 @@ export default async function handler(req, res) {
                 publishedAt: article.publishedAt,
                 source: article.source
             }))
-            .slice(0, 12); // أقصى 12 خبر
+            .slice(0, 12); // أقصى 12 خبر تقني
 
-        console.log(`✅ Clean articles after filtering: ${filteredArticles.length}`);
+        console.log(`✅ Tech/Gaming articles after filtering: ${filteredArticles.length}`);
 
         if (filteredArticles.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "لا توجد أخبار صالحة للعرض حالياً",
-                error: "No valid articles after filtering"
+                message: "لا توجد أخبار تقنية أو ألعاب صالحة للعرض حالياً",
+                error: "No valid tech/gaming articles after filtering"
             });
         }
 
         return res.status(200).json({
             success: true,
-            source: 'newsapi',
+            source: 'newsapi_tech_gaming',
             totalResults: filteredArticles.length,
             articles: filteredArticles,
             meta: {
                 fetched_at: new Date().toISOString(),
                 api_total: data.totalResults,
-                filtered_count: filteredArticles.length
+                filtered_count: filteredArticles.length,
+                content_type: 'technology_and_gaming_only'
             }
         });
 
@@ -149,7 +210,7 @@ export default async function handler(req, res) {
         
         return res.status(500).json({
             success: false,
-            message: "فشل في جلب الأخبار من المصدر",
+            message: "فشل في جلب الأخبار التقنية",
             error: error.message,
             timestamp: new Date().toISOString()
         });
