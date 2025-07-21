@@ -1,50 +1,52 @@
-// js/main.js - أخبار حقيقية فقط
+// js/main.js - (v2) محسّن لمعالجة الأخطاء وعرض الرسائل بوضوح
+
 document.addEventListener('DOMContentLoaded', () => {
     const newsGrid = document.getElementById('news-grid');
     const loader = document.getElementById('loader');
+    const mainContainer = document.querySelector('main.container');
 
-    // عرض الأخبار الحقيقية
-    const displayNews = (articles) => {
-        newsGrid.innerHTML = '';
+    // دالة لإزالة أي بانرات إشعارات سابقة
+    const removeNoticeBanners = () => {
+        const existingBanners = mainContainer.querySelectorAll('.notice-banner');
+        existingBanners.forEach(banner => banner.remove());
+    };
+
+    // دالة لعرض بانر إشعار جديد
+    const showNoticeBanner = (message, type = 'error') => {
+        removeNoticeBanners(); // إزالة البانرات القديمة أولاً
+        const banner = document.createElement('div');
+        banner.className = 'notice-banner';
         
-        if (!articles || articles.length === 0) {
-            newsGrid.innerHTML = `
-                <div style="text-align: center; padding: 40px; grid-column: 1 / -1; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 8px;">
-                    <h3>❌ لا توجد أخبار متاحة حالياً</h3>
-                    <p>قد يكون السبب:</p>
-                    <ul style="text-align: right; margin: 15px 0;">
-                        <li>انتهاء حصة NewsAPI اليومية</li>
-                        <li>مشكلة في الاتصال بالإنترنت</li>
-                        <li>عدم وجود أخبار جديدة</li>
-                    </ul>
-                    <button onclick="window.location.reload()" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        إعادة المحاولة
-                    </button>
-                </div>
-            `;
-            return;
+        let styles = '';
+        if (type === 'error') {
+            styles = 'background: #f8d7da; border-left: 5px solid #dc3545; color: #721c24;';
+        } else if (type === 'warning') {
+            styles = 'background: #fff3cd; border-left: 5px solid #ffc107; color: #856404;';
+        } else if (type === 'success') {
+            styles = 'background: #d4edda; border-left: 5px solid #28a745; color: #155724;';
         }
 
-        // عرض الأخبار الحقيقية بدون أي بانرات
+        banner.style.cssText = `padding: 15px; margin-bottom: 20px; border-radius: 8px; text-align: center; font-weight: 500; ${styles}`;
+        banner.innerHTML = message;
+        mainContainer.insertBefore(banner, loader);
+    };
+
+    const displayNews = (articles) => {
+        newsGrid.innerHTML = ''; // تنظيف الشبكة قبل عرض الأخبار الجديدة
+
         articles.forEach((article, index) => {
-            // تخطي المقالات المحذوفة
-            if (article.title === '[Removed]' || !article.title) return;
+            if (!article.title || article.title === '[Removed]') return;
 
-            // استخدام صورة افتراضية عالية الجودة إذا لم تكن موجودة
-            let imageUrl = article.urlToImage;
-            if (!imageUrl || imageUrl.includes('removed')) {
-                imageUrl = `https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=300&fit=crop&crop=center&auto=format&q=80`;
-            }
+            // استخدام صورة افتراضية في حالة عدم وجود صورة أو في حالة الخطأ
+            const imageUrl = article.urlToImage || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=300&fit=crop&crop=center&auto=format&q=80';
 
-            const shortDesc = article.description ? 
-                (article.description.length > 150 ? 
-                 article.description.substring(0, 150) + '...' : 
-                 article.description) : 
+            const shortDesc = article.description ?
+                (article.description.length > 150 ? article.description.substring(0, 150) + '...' : article.description) :
                 'اضغط لقراءة المزيد...';
 
             const card = document.createElement('a');
             card.className = 'card';
-            card.href = `article.html?index=${index}`;
+            card.href = `article.html?index=${index}`; // الربط بالصفحة التفصيلية
 
             card.innerHTML = `
                 <img src="${imageUrl}" 
@@ -59,178 +61,96 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="card-date">${formatDate(article.publishedAt)}</span>
                 </div>
             `;
-            
             newsGrid.appendChild(card);
         });
     };
 
-    // تنسيق التاريخ
     const formatDate = (dateString) => {
         if (!dateString) return '';
-        
         try {
             const date = new Date(dateString);
             const now = new Date();
-            const diffTime = Math.abs(now - date);
-            const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+            const diffHours = Math.ceil(Math.abs(now - date) / (1000 * 60 * 60));
+
+            if (diffHours < 1) return 'قبل دقائق';
+            if (diffHours < 24) return `قبل ${diffHours} ساعة`;
             
-            if (diffHours < 1) {
-                return 'منذ دقائق';
-            } else if (diffHours < 24) {
-                return `منذ ${diffHours} ساعة`;
-            } else {
-                const diffDays = Math.ceil(diffHours / 24);
-                if (diffDays === 1) {
-                    return 'منذ يوم واحد';
-                } else if (diffDays < 7) {
-                    return `منذ ${diffDays} أيام`;
-                } else {
-                    return date.toLocaleDateString('ar-EG', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    });
-                }
-            }
+            const diffDays = Math.ceil(diffHours / 24);
+            if (diffDays <= 1) return 'قبل يوم';
+            if (diffDays < 7) return `قبل ${diffDays} أيام`;
+
+            return date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
         } catch (error) {
             return '';
         }
     };
 
-    // جلب الأخبار الحقيقية فقط
     const loadNews = async () => {
+        removeNoticeBanners();
+        loader.classList.remove('hidden');
+        newsGrid.innerHTML = '';
+
         try {
-            console.log('🔄 جاري جلب الأخبار الحقيقية من NewsAPI...');
-            
-            // إظهار اللودر
-            loader.classList.remove('hidden');
-            newsGrid.innerHTML = '';
-
-            const response = await fetch('/api/fetchNews', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
+            console.log('🔄 جاري جلب الأخبار من /api/fetchNews...');
+            const response = await fetch('/api/fetchNews');
+            const data = await response.json();
             console.log('📊 API Response Status:', response.status);
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            console.log('📰 تم جلب البيانات:', data);
-
-            if (!data.success) {
-                throw new Error(data.message || 'فشل في جلب الأخبار');
+            if (!response.ok || !data.success) {
+                // رمي خطأ مع رسالة واضحة من الخادم
+                throw new Error(data.message || `فشل تحميل الأخبار (حالة: ${response.status})`);
             }
 
             const articles = data.articles || [];
-            
             if (articles.length === 0) {
-                throw new Error('لا توجد أخبار متاحة من NewsAPI');
+                // هذه الحالة لا يجب أن تحدث إذا كان الـ API يعمل بشكل صحيح
+                throw new Error("API succeeded but returned no articles.");
             }
 
-            // حفظ البيانات في localStorage للصفحة التفصيلية
+            // --- كل شيء نجح ---
             localStorage.setItem('lingramNewsData', JSON.stringify(articles));
-            
-            // عرض الأخبار الحقيقية
             displayNews(articles);
-            
-            console.log(`✅ تم عرض ${articles.length} خبر حقيقي من NewsAPI`);
-
-            // إضافة بانر نجاح (اختياري)
-            if (articles.length > 0) {
-                const successBanner = document.createElement('div');
-                successBanner.style.cssText = `
-                    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-                    color: white;
-                    padding: 10px;
-                    margin-bottom: 20px;
-                    border-radius: 8px;
-                    text-align: center;
-                    font-size: 0.9rem;
-                `;
-                successBanner.innerHTML = `✅ تم جلب ${articles.length} خبر حقيقي من NewsAPI`;
-                newsGrid.parentNode.insertBefore(successBanner, newsGrid);
-                
-                // إخفاء البانر بعد 3 ثواني
-                setTimeout(() => {
-                    successBanner.remove();
-                }, 3000);
-            }
+            showNoticeBanner(`✅ تم بنجاح جلب ${articles.length} خبر جديد!`, 'success');
+            console.log(`✅ تم عرض ${articles.length} خبر.`);
 
         } catch (error) {
-            console.error('❌ خطأ في جلب الأخبار:', error);
-            
-            // محاولة تحميل بيانات محفوظة
+            console.error('❌ خطأ في جلب الأخبار:', error.message);
+            showNoticeBanner(`⚠️ ${error.message}`, 'error');
+
+            // محاولة عرض بيانات محفوظة كخطة بديلة
             const cachedData = localStorage.getItem('lingramNewsData');
-            
             if (cachedData) {
                 try {
                     const articles = JSON.parse(cachedData);
                     if (articles.length > 0) {
                         displayNews(articles);
-                        console.log('📦 تم تحميل أخبار محفوظة');
-                        
-                        // إظهار رسالة تحديث
-                        const cacheNotice = document.createElement('div');
-                        cacheNotice.style.cssText = `
-                            background: #fff3cd; 
-                            border: 1px solid #ffeaa7; 
-                            color: #856404; 
-                            padding: 15px; 
-                            margin-bottom: 20px; 
-                            border-radius: 8px; 
-                            text-align: center;
-                        `;
-                        cacheNotice.innerHTML = `⚠️ يتم عرض أخبار محفوظة من آخر جلسة ناجحة - ${error.message}`;
-                        newsGrid.parentNode.insertBefore(cacheNotice, newsGrid);
-                        
-                        return;
+                        console.log('📦 تم عرض أخبار محفوظة من آخر جلسة.');
+                        showNoticeBanner(`⚠️ ${error.message} - يتم الآن عرض آخر أخبار تم تحميلها بنجاح.`, 'warning');
+                        return; // الخروج من الدالة لأننا عرضنا شيئاً
                     }
                 } catch (e) {
                     console.error('خطأ في تحليل البيانات المحفوظة:', e);
                 }
             }
-
-            // عرض رسالة خطأ تفصيلية
+            
+            // إذا فشل كل شيء، عرض رسالة خطأ نهائية
             newsGrid.innerHTML = `
                 <div style="text-align: center; padding: 40px; grid-column: 1 / -1; background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; border-radius: 8px;">
-                    <h3>❌ فشل في جلب الأخبار</h3>
+                    <h3>❌ لا توجد أخبار لعرضها</h3>
                     <p style="margin: 15px 0;"><strong>السبب:</strong> ${error.message}</p>
-                    
-                    <div style="background: #fff; padding: 15px; border-radius: 5px; margin: 20px 0; color: #495057;">
-                        <strong>الحلول المقترحة:</strong>
-                        <ul style="text-align: right; margin-top: 10px;">
-                            <li>تحقق من الاتصال بالإنترنت</li>
-                            <li>تأكد من صحة مفتاح NewsAPI</li>
-                            <li>قد تحتاج لترقية حساب NewsAPI للعمل على الخوادم</li>
-                            <li>حاول مرة أخرى بعد قليل</li>
-                        </ul>
-                    </div>
-                    
                     <button onclick="window.location.reload()" 
                             style="margin-top: 15px; padding: 12px 25px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">
                         🔄 إعادة المحاولة
                     </button>
                 </div>
             `;
-            
+
         } finally {
-            // إخفاء اللودر
             loader.classList.add('hidden');
         }
     };
 
-    // بدء تحميل الأخبار الحقيقية
+    // [!] تحسين: تم إزالة التحديث التلقائي `setInterval` للحفاظ على حصة API
+    // يمكنك إضافة زر "تحديث" إذا أردت.
     loadNews();
-
-    // إعادة تحميل الأخبار كل 15 دقيقة (للأخبار الحقيقية)
-    setInterval(() => {
-        console.log('🔄 إعادة تحديث تلقائية للأخبار الحقيقية...');
-        loadNews();
-    }, 15 * 60 * 1000);
 });
