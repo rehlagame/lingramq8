@@ -1,8 +1,9 @@
-# Environment variables
+# Environment Variables (NEVER commit these!)
 .env
 .env.local
 .env.production
 .env.staging
+*.env
 
 # Dependencies
 node_modules/
@@ -11,19 +12,32 @@ node_modules/
 # Logs
 logs
 *.log
+npm-debug.log*
 
 # Vercel
 .vercel
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Temporary files
 *.tmp
 *.temp
-plan.txt
+.cache/
+
+# Build outputs
+dist/
+build/
+out/
