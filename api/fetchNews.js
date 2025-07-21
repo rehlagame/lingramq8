@@ -1,7 +1,7 @@
-// api/fetchNews.js - (v4) الكود النهائي مع قائمة كلمات متوازنة
+// api/fetchNews.js - (v5) الكود النهائي مع قائمة كلمات مضمونة
 
 export default async function handler(req, res) {
-    console.log('🟢 fetchNews API called - Tech & Gaming Only [v4 - Balanced]');
+    console.log('🟢 fetchNews API called - Tech & Gaming Only [v5 - Final]');
 
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,34 +16,32 @@ export default async function handler(req, res) {
     const API_KEY = process.env.NEWS_API_KEY;
     if (!API_KEY) {
         console.error("❌ CRITICAL: Missing NEWS_API_KEY");
-        return res.status(500).json({ success: false, message: "خطأ في إعدادات الخادم - مفتاح API مفقود" });
+        return res.status(500).json({ success: false, message: "خطأ في إعدادات الخادم" });
     }
 
     try {
-        console.log('🎮 Fetching tech & gaming news...');
-
-        // [!!!] إصلاح نهائي: قائمة كلمات مفتاحية متوازنة - واسعة بما يكفي للعثور على نتائج وقصيرة بما يكفي لتجنب الأخطاء
+        // [!!!] الحل النهائي: قائمة كلمات أوسع لضمان العثور على نتائج
         const techKeywords = [
-            // كلمات عامة وقوية
-            'تقنية', 'تكنولوجيا', 'ألعاب', 'gaming',
+            // كلمات عامة قوية
+            'تقنية', 'تكنولوجيا', 'هاتف', 'كمبيوتر', 'لعبة', 'ألعاب', 'gaming',
 
-            // شركات ومنصات كبرى (استخدام "" يزيد الدقة)
-            'Apple', 'Google', '"مايكروسوفت"', 'NVIDIA', 'AMD', 'Intel',
-            'بلايستيشن', 'PlayStation', 'اكسبوكس', 'Xbox', 'Nintendo',
+            // شركات ومنصات أساسية
+            'Apple', 'Google', 'Microsoft', 'NVIDIA', 'Intel',
+            'PlayStation', 'Xbox', 'Nintendo',
 
             // منتجات ومصطلحات شائعة
-            'آيفون', 'iPhone', 'سامسونج', 'هواوي', 'شاومي', '"ذكاء اصطناعي"',
-            'AI', 'تسريبات', 'تحديث'
+            'iPhone', 'Android', 'Windows', 'سامسونج', '"ذكاء اصطناعي"', 'AI', 'تحديث'
         ];
 
         const query = encodeURIComponent(techKeywords.join(' OR '));
-        const fromDate = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10); // زيادة نطاق البحث إلى 3 أيام
+        // زيادة نطاق البحث إلى 4 أيام لزيادة فرصة العثور على أخبار
+        const fromDate = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
         const url = `https://newsapi.org/v2/everything?q=${query}&language=ar,en&sortBy=publishedAt&pageSize=100&from=${fromDate}`;
 
-        console.log('🔗 Building NewsAPI URL:', url.slice(0, 200) + '...');
+        console.log('🔗 Building Final NewsAPI URL:', url.substring(0, 250) + '...');
 
-        const response = await fetch(url, { headers: { 'X-Api-Key': API_KEY, 'User-Agent': 'LingramQ8-Bot/1.3' } });
+        const response = await fetch(url, { headers: { 'X-Api-Key': API_KEY, 'User-Agent': 'LingramQ8-Bot/1.4' } });
 
         console.log('📊 NewsAPI Response Status:', response.status);
 
@@ -63,14 +61,15 @@ export default async function handler(req, res) {
         }
 
         const politicalKeywords = [
-            'سياس', 'حكومة', 'رئيس', 'وزير', 'برلمان', 'انتخابات', 'دستور',
-            'حرب', 'صراع', 'نزاع', 'هجوم', 'قصف', 'معاهدة', 'دبلوماس'
+            'سياس', 'حكومة', 'رئيس', 'وزير', 'برلمان', 'انتخابات',
+            'حرب', 'صراع', 'نزاع', 'هجوم', 'قصف', 'معاهدة'
         ];
 
         const filteredArticles = data.articles
             .filter(article => {
-                if (!article.title || article.title === "[Removed]" || !article.description) return false;
+                if (!article.title || article.title.includes("[Removed]") || !article.description) return false;
                 const titleAndDesc = (article.title + ' ' + article.description).toLowerCase();
+                // التأكد من خلوه من الكلمات السياسية
                 return !politicalKeywords.some(keyword => titleAndDesc.includes(keyword));
             })
             .map(article => ({
@@ -81,7 +80,7 @@ export default async function handler(req, res) {
                 publishedAt: article.publishedAt,
                 source: article.source
             }))
-            .slice(0, 20);
+            .slice(0, 24);
 
         console.log(`✅ Articles after filtering: ${filteredArticles.length}`);
 
@@ -94,8 +93,6 @@ export default async function handler(req, res) {
 
         return res.status(200).json({
             success: true,
-            source: 'newsapi_tech_gaming_v4_balanced',
-            totalResults: filteredArticles.length,
             articles: filteredArticles,
         });
 
