@@ -1,98 +1,145 @@
-// File: /api/postToTwitter.js
-// The final, robust version of the automated Twitter posting function.
-
+// api/postToTwitter.js
 import { kv } from '@vercel/kv';
 import { TwitterApi } from 'twitter-api-v2';
 
-// Keywords to identify an important article
-const IMPORTANT_KEYWORDS = ['إطلاق', 'حصريا', 'رسميا', 'رسميًا', 'لأول مرة', 'الكشف عن','اطلاق',  'تعلن'];
-const LAST_POSTED_KEY = 'last_posted_url'; // Use a constant for the database key
+// كلمات مهمة للبحث عن أفضل الأخبار
+const IMPORTANT_KEYWORDS = [
+    'إطلاق', 'حصريا', 'رسميا', 'رسميًا', 'لأول مرة',
+    'الكشف عن', 'اطلاق', 'تعلن', 'جديد', 'عاجل'
+];
 
-// Main handler for the Vercel Cron Job
+const LAST_POSTED_KEY = 'last_posted_article';
+const LAST_RUN_KEY = 'last_cron_run';
+
 export default async function handler(req, res) {
-    // 1. Security Check: Only allow Vercel's Cron or an authorized user to run this.
-    if (req.headers['authorization'] !== `Bearer ${process.env.CRON_SECRET}`) {
-        return res.status(401).json({ message: 'Unauthorized' });
+    // التحقق من طريقة الطلب
+    if (req.method !== 'POST' && req.method !== 'GET') {
+        return res.status(405).json({ message: 'Method not allowed' });
     }
 
     try {
-        // 2. Fetch latest news from NewsAPI
-        console.log("CRON JOB: Task started. Fetching news...");
-        const articles = await fetchNews();
+        console.log("🤖 بدء مهمة بوت تويتر...");
+
+        // التحقق من آخر تشغيل لتجنب التكرار
+        const lastRun = await kv.get(LAST_RUN_KEY);
+        const now = Date.now();
+        const twoHours = 2 * 60 * 60 * 1000; // ساعتين بالميلي ثانية
+
+        if (lastRun && (now - lastRun) < twoHours) {
+            console.log("⏰ لم تمر ساعتين بعد من آخر تشغيل");
+            return res.status(200).json({
+                message: "تم التشغيل مؤخراً - انتظار ساعتين"
+            });
+        }
+
+        // جلب الأخبار
+        const articles = await fetchLatestNews();
 
         if (!articles || articles.length === 0) {
-            console.log("CRON JOB: No news found from API. Task finished.");
-            return res.status(200).json({ message: "No news found to process." });
+            console.log("❌ لا توجد أخبار متاحة");
+            return res.status(200).json({ message: "لا توجد أخبار جديدة" });
         }
 
-        // 3. Find the best article to post
-        console.log(`CRON JOB: Analyzing ${articles.length} articles...`);
-        const bestArticle = findBestArticle(articles);
+        console.log(`📰 تم العثور على ${articles.length} مقال`);
 
-        if (!bestArticle) {
-            console.log("CRON JOB: No suitable article found. Task finished.");
-            return res.status(200).json({ message: "No suitable article found." });
+        // اختيار أفضل مقال
+        const selectedArticle = selectBestArticle(articles);
+
+        if (!selectedArticle) {
+            console.log("❌ لم يتم العثور على مقال مناسب");
+            return res.status(200).json({ message: "لا يوجد مقال مناسب للنشر" });
         }
 
-        // 4. Check for duplicates to avoid re-posting
-        const lastPostedUrl = await kv.get(LAST_POSTED_KEY);
-        if (lastPostedUrl === bestArticle.url) {
-            console.log(`CRON JOB: Best article (${bestArticle.title}) was already posted. Skipping.`);
-            return res.status(200).json({ message: "Article already posted." });
+        // التحقق من عدم تكرار النشر
+        const lastPosted = await kv.get(LAST_POSTED_KEY);
+        if (lastPosted?.url === selectedArticle.url) {
+            console.log("🔄 تم نشر هذا المقال مسبقاً");
+            return res.status(200).json({ message: "تم نشر هذا المقال مسبقاً" });
         }
 
-        // 5. Post the selected article to Twitter
-        console.log(`CRON JOB: Found new article to post: "${bestArticle.title}"`);
-        await postToTwitter(bestArticle);
+        // نشر على تويتر
+        console.log(`📤 نشر المقال: ${selectedArticle.title.substring(0, 50)}...`);
+        await postToTwitter(selectedArticle);
 
-        // 6. Save the new article's URL to the database
-        await kv.set(LAST_POSTED_KEY, bestArticle.url);
-        console.log("CRON JOB: Successfully posted to Twitter and updated KV store.");
+        // حفظ معلومات آخر نشر وآخر تشغيل
+        await kv.set(LAST_POSTED_KEY, {
+            url: selectedArticle.url,
+            title: selectedArticle.title,
+            postedAt: now
+        });
+        await kv.set(LAST_RUN_KEY, now);
 
-        return res.status(200).json({ success: true, posted_title: bestArticle.title });
+        console.log("✅ تم النشر بنجاح على تويتر");
+
+        return res.status(200).json({
+            success: true,
+            message: "تم النشر بنجاح",
+            article: {
+                title: selectedArticle.title,
+                source: selectedArticle.source.name
+            }
+        });
 
     } catch (error) {
-        // Enhanced error logging for easier debugging on Vercel
-        console.error("--- CRON JOB FAILED ---");
-        console.error("Error Message:", error.message);
-        if (error.data) { // Twitter API specific errors
-            console.error("Twitter API Error Data:", error.data);
-        }
-        console.error("Error Stack:", error.stack);
-        console.error("--- END OF ERROR ---");
-
-        return res.status(500).json({ success: false, error: error.message });
+        console.error("❌ خطأ في بوت تويتر:", error);
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 }
 
-// --- Helper Functions ---
-
-async function fetchNews() {
+async function fetchLatestNews() {
     const API_KEY = process.env.NEWS_API_KEY;
-    const keywords = 'تقنية OR ألعاب OR بلايستيشن OR اكسبوكس OR ابل OR جوجل';
-    const query = encodeURIComponent(keywords);
-    const url = `https://newsapi.org/v2/everything?q=${query}&language=ar&sortBy=publishedAt&pageSize=10`;
 
-    const response = await fetch(url, { headers: { 'X-Api-Key': API_KEY } });
+    if (!API_KEY) {
+        throw new Error("مفتاح NewsAPI مفقود");
+    }
+
+    const keywords = [
+        'تقنية', 'ألعاب', 'بلايستيشن', 'اكسبوكس',
+        'ابل', 'جوجل', 'انفيديا'
+    ].join(' OR ');
+
+    const query = encodeURIComponent(keywords);
+    const url = `https://newsapi.org/v2/everything?q=${query}&language=ar&sortBy=publishedAt&pageSize=10&from=${new Date(Date.now() - 6*60*60*1000).toISOString()}`;
+
+    const response = await fetch(url, {
+        headers: {
+            'X-Api-Key': API_KEY,
+            'User-Agent': 'LingramQ8-TwitterBot/1.0'
+        }
+    });
+
     if (!response.ok) {
-        // Log the error response from NewsAPI for more details
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch from NewsAPI. Status: ${response.status}. Body: ${errorText}`);
+        throw new Error(`NewsAPI Error: ${response.status}`);
     }
 
     const data = await response.json();
-    return data.articles;
+
+    return data.articles?.filter(article =>
+        article.title &&
+        article.title !== "[Removed]" &&
+        article.description &&
+        article.url
+    ) || [];
 }
 
-function findBestArticle(articles) {
-    // First, find an article that matches our important keywords
-    const importantArticle = articles.find(article =>
-        article.title && IMPORTANT_KEYWORDS.some(keyword => article.title.includes(keyword))
+function selectBestArticle(articles) {
+    // البحث عن مقال يحتوي على كلمات مهمة
+    let bestArticle = articles.find(article =>
+        IMPORTANT_KEYWORDS.some(keyword =>
+            article.title?.includes(keyword) ||
+            article.description?.includes(keyword)
+        )
     );
-    if (importantArticle) return importantArticle;
 
-    // If no "important" article is found, fall back to the newest one
-    return articles[0] || null;
+    // إذا لم نجد مقال مهم، نأخذ الأحدث
+    if (!bestArticle) {
+        bestArticle = articles[0];
+    }
+
+    return bestArticle;
 }
 
 async function postToTwitter(article) {
@@ -103,22 +150,27 @@ async function postToTwitter(article) {
         accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
     });
 
-    // Truncate the title to avoid exceeding Twitter's character limit
-    // Max length is approx 150 chars to leave room for other text and the link
-    const maxTitleLength = 150;
-    const truncatedTitle = article.title.length > maxTitleLength
-        ? article.title.substring(0, maxTitleLength) + '...'
-        : article.title;
+    // تحضير النص
+    const maxTitleLength = 120;
+    let title = article.title;
 
-    const tweetText = `
-🚨 خبر جديد | ${truncatedTitle}
+    if (title.length > maxTitleLength) {
+        title = title.substring(0, maxTitleLength) + '...';
+    }
 
-#LingramQ8 #اخبار_تقنية #العاب
+    // تكوين التغريدة
+    const tweetText = `🚨 ${title}
 
-اقرأ المزيد: ${article.url}
-  `;
+📖 المصدر: ${article.source.name}
 
-    // Use the read-write client to post a tweet
+#LingramQ8 #اخبار_تقنية #العاب #تقنية
+
+🔗 ${article.url}`;
+
+    // نشر التغريدة
     const rwClient = twitterClient.readWrite;
-    await rwClient.v2.tweet(tweetText);
+    const result = await rwClient.v2.tweet(tweetText);
+
+    console.log("✅ تم نشر التغريدة:", result.data.id);
+    return result;
 }

@@ -1,8 +1,35 @@
 {
+  "functions": {
+    "api/fetchNews.js": {
+      "maxDuration": 30
+    },
+    "api/postToTwitter.js": {
+      "maxDuration": 60
+    }
+  },
   "crons": [
     {
       "path": "/api/postToTwitter",
       "schedule": "0 */2 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
     }
   ]
 }

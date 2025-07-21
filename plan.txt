@@ -49,3 +49,178 @@ sjwdOoJmDvf0tYCkQKJe5WHfpKUpfmx9QJFxyHMIVpIMk
 
 copy-light
 Copy
+
+المفتاح الأول:
+Name (في Vercel): TWITTER_API_KEY
+Value (قيمته): هو الـ API Key الذي نسخته من تويتر.
+المفتاح الثاني:
+Name (في Vercel): TWITTER_API_SECRET
+Value (قيمته): هو الـ API Key Secret الذي نسخته من تويتر.
+المفتاح الثالث:
+Name (في Vercel): TWITTER_ACCESS_TOKEN
+Value (قيمته): هو الـ Access Token الذي نسخته من تويتر.
+المفتاح الرابع:
+Name (في Vercel): TWITTER_ACCESS_TOKEN_SECRET
+Value (قيمته): هو الـ Access Token Secret الذي نسخته من تويتر.
+
+
+# دليل إعداد ونشر مدونة LingramQ8 🚀
+
+## المشاكل التي تم إصلاحها ✅
+
+1. **مشكلة عدم ظهور الأخبار**: تم إصلاح API وتحسين معالجة الأخطاء
+2. **مشكلة CORS**: تم إضافة headers مناسبة
+3. **مشكلة التعقيد**: تم تبسيط الكود وتنظيمه
+4. **مشكلة التحديث التلقائي**: تم ضبط البوت ليعمل كل ساعتين
+5. **مشكلة عرض المقالات**: تم تحسين واجهة المستخدم
+
+## خطوات النشر على Vercel 🌐
+
+### 1. رفع الملفات
+```
+lingramq8/
+├── api/
+│   ├── fetchNews.js     (تم تحسينه)
+│   └── postToTwitter.js (تم تحسينه)
+├── css/
+│   └── style.css        (تم تحسينه)
+├── js/
+│   ├── main.js          (تم تحسينه)
+│   └── article.js       (تم تحسينه)
+├── images/
+│   └── logo.PNG
+├── index.html
+├── article.html
+├── package.json
+├── vercel.json          (تم تحسينه)
+└── .env.local           (جديد)
+```
+
+### 2. إعداد متغيرات البيئة في Vercel
+
+في لوحة تحكم Vercel، اذهب إلى **Settings > Environment Variables** وأضف:
+
+```
+NEWS_API_KEY = e115783e669b4fc19870790ddb8ca2d6
+TWITTER_API_KEY = wh1oJIgjqGOmAactU90Mst7PI
+TWITTER_API_SECRET = A8RyVgSqqIEWzYeHiIBHoxmoUnDuTxJvjaKOVMnlxGNYoLOPhO
+TWITTER_ACCESS_TOKEN = 1870727299-rCTMLZIv2QJmvrBWyDA9Vo4gfrB6hlKeOhU2trj
+TWITTER_ACCESS_TOKEN_SECRET = sjwdOoJmDvf0tYCkQKJe5WHfpKUpfmx9QJFxyHMIVpIMk
+```
+
+### 3. إعداد قاعدة البيانات KV
+
+1. اذهب إلى **Storage** في Vercel
+2. أنشئ **KV Database** جديدة
+3. انسخ المتغيرات وأضفها للمشروع تلقائياً
+
+### 4. تفعيل Cron Jobs
+
+في Vercel، اذهب إلى **Functions** وتأكد من تفعيل:
+- **Cron Jobs**: ✅
+- **Edge Functions**: ✅
+
+## التحقق من عمل الموقع 🔍
+
+### 1. اختبار API الأخبار
+```
+GET https://your-domain.vercel.app/api/fetchNews
+```
+
+### 2. اختبار بوت تويتر (يدوياً)
+```
+POST https://your-domain.vercel.app/api/postToTwitter
+```
+
+### 3. التحقق من الكرون
+- البوت سيعمل تلقائياً كل ساعتين
+- يمكن متابعة اللوجز في Vercel Functions
+
+## الميزات الجديدة 🆕
+
+### للموقع:
+- ✅ تحديث تلقائي كل 10 دقائق
+- ✅ حفظ البيانات محلياً كاحتياطي
+- ✅ رسائل خطأ واضحة
+- ✅ تصميم محسّن ومتجاوب
+- ✅ زر مشاركة للمقالات
+- ✅ عرض تاريخ النشر
+
+### لبوت تويتر:
+- ✅ نشر كل ساعتين بدقة
+- ✅ اختيار أفضل الأخبار تلقائياً
+- ✅ تجنب التكرار
+- ✅ تغريدات منسقة جميلة
+- ✅ هاشتاجز مناسبة
+
+## إعدادات إضافية (اختيارية) ⚙️
+
+### 1. تخصيص مصادر الأخبار
+عدّل في `fetchNews.js`:
+```javascript
+const keywords = [
+    'تقنية', 'ألعاب', 'بلايستيشن', 'اكسبوكس',
+    'ابل', 'جوجل', 'انفيديا', 'سامسونج'
+    // أضف كلمات أخرى هنا
+];
+```
+
+### 2. تغيير توقيت النشر
+عدّل في `vercel.json`:
+```json
+{
+  "crons": [
+    {
+      "path": "/api/postToTwitter",
+      "schedule": "0 */1 * * *"  // كل ساعة
+    }
+  ]
+}
+```
+
+### 3. تخصيص التغريدات
+عدّل في `postToTwitter.js`:
+```javascript
+const tweetText = `🚨 ${title}
+
+📖 المصدر: ${article.source.name}
+
+#LingramQ8 #اخبار_تقنية #العاب
+
+🔗 ${article.url}`;
+```
+
+## استكشاف الأخطاء 🔧
+
+### إذا لم تظهر الأخبار:
+1. تحقق من متغيرات البيئة
+2. تحقق من حصة NewsAPI (1000 طلب/يوم)
+3. راجع لوجز Vercel Functions
+
+### إذا لم يعمل بوت تويتر:
+1. تحقق من صحة بيانات Twitter API
+2. تأكد من أن التطبيق له صلاحية الكتابة
+3. راجع لوجز الكرون في Vercel
+
+### إذا كانت الصفحات بطيئة:
+1. تحقق من حجم الصور
+2. راجع عدد الطلبات للAPI
+3. فعّل التخزين المؤقت
+
+## نصائح للصيانة 💡
+
+1. **راقب حصة API**: NewsAPI يعطي 1000 طلب مجاني/يوم
+2. **راجع التغريدات**: تأكد من جودة المحتوى المنشور
+3. **حدّث الكلمات المفتاحية**: أضف كلمات جديدة للبحث
+4. **تابع الأداء**: استخدم Vercel Analytics
+
+## الدعم الفني 📞
+
+إذا واجهت أي مشاكل:
+1. راجع لوجز Vercel Functions
+2. تحقق من صحة متغيرات البيئة
+3. اختبر الـ APIs يدوياً
+
+---
+
+**نجح النشر؟** 🎉 الموقع جاهز والبوت يعمل تلقائياً!
