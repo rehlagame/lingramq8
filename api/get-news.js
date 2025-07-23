@@ -13,7 +13,7 @@ export default async function handler(request, response) {
         (
             "غوغل" OR "آبل" OR "مايكروسوفت" OR "ميتا" OR "تسلا" OR "OpenAI" OR
             "آيفون" OR "ChatGPT" OR "بلايستيشن" OR "اكسبوكس" OR "نينتندو" OR "ستيم" OR 
-            "ألعاب فيديو" OR "أمن سيبراني" OR "ثغرة" OR "اختراق" OR
+            "ألعاب فيديو" OR "أمن سيبراني" OR "ثغرة" OR
             "ذكاء اصطناعي" OR "تكنولوجيا" OR "عملة رقمية"
         ) 
         NOT (سياسة OR حرب OR اقتصاد OR رياضة)
