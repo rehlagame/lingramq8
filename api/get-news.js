@@ -16,7 +16,11 @@ export default async function handler(request, response) {
             "ألعاب فيديو" OR "أمن سيبراني" OR "ثغرة" OR
             "ذكاء اصطناعي" OR "تكنولوجيا" OR "عملة رقمية"
         ) 
-        NOT (سياسة OR حرب OR اقتصاد OR رياضة)
+        NOT (
+            سياسة OR حرب OR اقتصاد OR رياضة OR 
+            غزة OR إسرائيل OR فلسطين OR الاحتلال OR قصف OR 
+            نتنياهو OR اسرائيل OR إيران OR سوريا OR الضفة OR حماس OR القدس
+        )
     `;
 
     // بناء رابط الطلب الكامل
