@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryKeywords = {
         tech: [ 'تكنولوجيا', 'هواتف', 'جوالات', 'حواسيب', 'برمجة', 'سامسونج', 'آبل', 'جوجل', 'ويندوز', 'تسلا'],
         gaming: ['ألعاب', 'لعبة', 'بلايستيشن', 'اكسبوكس', 'نينتندو', 'ستيم', 'PC gaming', 'eSports', 'PS5', 'Xbox'],
-        security: ['سيبراني', 'أمن', 'اختراق', 'فيروس', 'malware', 'phishing', 'حماية', 'ثغرة'],
+        security: ['سيبراني', 'أمن', 'فيروس', 'malware', 'phishing', 'حماية', 'ثغرة'],
         ai: ['ذكاء اصطناعي', 'تعلم الآلة', 'ChatGPT', 'OpenAI', 'AI', 'غروك']
     };
 
