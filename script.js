@@ -14,20 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchForm = document.getElementById('search-form');
     const searchInput = document.getElementById('search-input');
 
-    // مخزن البيانات والحالة
-    let articlesCache = []; // لتخزين جميع الأخبار من الـ API
+    let articlesCache = [];
     let currentCategory = 'all';
     let currentSearchTerm = '';
 
-    // تعريف كلمات مفتاحية لكل قسم
     const categoryKeywords = {
-        tech: ['تقنية', 'تكنولوجيا', 'هواتف', 'جوالات', 'حواسيب', 'برمجة', 'سامسونج', 'آبل', 'جوجل'],
-        gaming: ['ألعاب', 'لعبة', 'بلايستيشن', 'اكسبوكس', 'نينتندو', 'PC gaming', 'eSports', 'PS5', 'Xbox'],
-        security: ['سيبراني', 'أمن', 'اختراق', 'فيروس', 'malware', 'phishing', 'حماية'],
-        ai: ['ذكاء اصطناعي', 'تعلم الآلة', 'ChatGPT', 'OpenAI', 'AI']
+        tech: ['تقنية', 'تكنولوجيا', 'هواتف', 'جوالات', 'حواسيب', 'برمجة', 'سامسونج', 'آبل', 'جوجل', 'ويندوز', 'تسلا'],
+        gaming: ['ألعاب', 'لعبة', 'بلايستيشن', 'اكسبوكس', 'نينتندو', 'ستيم', 'PC gaming', 'eSports', 'PS5', 'Xbox'],
+        security: ['سيبراني', 'أمن', 'اختراق', 'فيروس', 'malware', 'phishing', 'حماية', 'ثغرة'],
+        ai: ['ذكاء اصطناعي', 'تعلم الآلة', 'ChatGPT', 'OpenAI', 'AI', 'غروك']
     };
-
-    // === الدوال الرئيسية ===
 
     async function fetchNews() {
         loader.style.display = 'block';
@@ -37,8 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('فشل تحميل الأخبار');
 
             const data = await response.json();
-            articlesCache = data.articles.filter(a => a.urlToImage && a.title && a.description);
-            applyFilters(); // عرض الأخبار بعد تحميلها وتطبيق الفلاتر الافتراضية
+            
+            // ==== التطوير: ترتيب الأخبار هنا مباشرة ====
+            // نرتب المصفوفة حسب تاريخ النشر من الأحدث إلى الأقدم
+            const sortedArticles = data.articles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+            articlesCache = sortedArticles.filter(a => a.urlToImage && a.title && a.description);
+            applyFilters();
 
         } catch (error) {
             console.error('Error fetching news:', error);
@@ -51,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyFilters() {
         let filteredArticles = [...articlesCache];
 
-        // 1. تطبيق فلتر القسم (Category)
         if (currentCategory !== 'all') {
             const keywords = categoryKeywords[currentCategory];
             filteredArticles = filteredArticles.filter(article => {
@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // 2. تطبيق فلتر البحث
         if (currentSearchTerm) {
             filteredArticles = filteredArticles.filter(article =>
                 article.title.toLowerCase().includes(currentSearchTerm) ||
@@ -83,20 +82,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'news-card';
 
-            // إضافة معرّف فريد للخبر للوصول إليه لاحقاً
             card.addEventListener('click', () => {
-                // البحث عن الخبر الأصلي في الكاش لتجنب مشاكل الفهرس
                 const originalArticle = articlesCache.find(a => a.url === article.url);
                 showArticleDetails(originalArticle);
             });
 
+            // ==== التطوير: تنسيق التاريخ لعرضه ====
+            const publishedDate = new Date(article.publishedAt).toLocaleDateString('ar-EG', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            // ==== التطوير: إضافة التاريخ والمصدر في الـ Footer ====
             card.innerHTML = `
                 <img src="${article.urlToImage}" alt="${article.title}" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x200?text=Image+Not+Found';">
                 <div class="card-content">
                     <h2>${article.title}</h2>
                     <p>${article.description || ''}</p>
                     <div class="card-footer">
-                        <span>${article.source.name}</span>
+                        <span class="source-name">${article.source.name}</span>
+                        <span class="publish-date">${publishedDate}</span>
                     </div>
                 </div>
             `;
@@ -105,11 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showArticleDetails(article) {
+        // ... (هذه الدالة لا تحتاج أي تغيير)
         mainContent.classList.add('hidden');
         articleDetails.classList.remove('hidden');
         window.scrollTo(0, 0);
 
-        // تحديث عنوان الصفحة في المتصفح
         document.title = `${article.title} | lingramq8`;
 
         const publishedDate = new Date(article.publishedAt).toLocaleString('ar-EG', { dateStyle: 'long', timeStyle: 'short' });
@@ -135,16 +139,13 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // === ربط الأحداث (Event Listeners) ===
-
-    // العودة من صفحة التفاصيل
+    // ربط الأحداث (لا تغيير هنا)
     backButton.addEventListener('click', () => {
         articleDetails.classList.add('hidden');
         mainContent.classList.remove('hidden');
-        document.title = originalPageTitle; // استعادة العنوان الأصلي
+        document.title = originalPageTitle;
     });
 
-    // التعامل مع فلاتر الأقسام
     categoryFilters.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
             document.querySelector('.filter-btn.active').classList.remove('active');
@@ -154,13 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // التعامل مع البحث
     searchForm.addEventListener('submit', (e) => {
         e.preventDefault();
         currentSearchTerm = searchInput.value.trim().toLowerCase();
         applyFilters();
     });
 
-    // === بدء تشغيل التطبيق ===
     fetchNews();
 });
