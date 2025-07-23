@@ -1,0 +1,336 @@
+:root {
+    /* ألوان مستمدة من الشعار */
+    --primary-color: #D81E2C; /* الأحمر القوي */
+    --secondary-color: #F85A5A; /* الأحمر الفاتح */
+    --accent-color: #F5B85A; /* البرتقالي/الرملي */
+
+    /* نظام الألوان الفاتح */
+    --light-bg: #f9f9f9;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+    --text-muted: #666666;
+    --border-color: #e0e0e0;
+}
+
+body {
+    font-family: 'Poppins', 'Cairo', sans-serif; /* Poppins هو الأساس مع Cairo كبديل للعربية */
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    margin: 0;
+    line-height: 1.7;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+header {
+    background-color: var(--card-bg);
+    padding: 25px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    max-height: 70px; /* تحديد ارتفاع الشعار */
+    margin-bottom: 10px;
+}
+
+header h1 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 2.8rem;
+    font-weight: 700;
+}
+
+/* حاوية الفلاتر والبحث */
+.filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    margin: 30px 0;
+    border: 1px solid var(--border-color);
+}
+
+/* أزرار التصنيفات */
+.category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter-btn {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.filter-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* شريط البحث */
+.search-form {
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.search-form input {
+    border: none;
+    padding: 10px 15px;
+    font-size: 0.9rem;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+    width: 200px; /* يمكن تعديله */
+    background-color: transparent; /* ليتماشى مع الخلفية */
+}
+
+.search-form button {
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-form button:hover {
+    background-color: #b0121f;
+}
+
+
+/* شبكة الأخبار */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px 0;
+}
+
+.news-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+}
+
+.news-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 30px rgba(216, 30, 44, 0.15); /* ظل بلون الشعار */
+}
+
+.news-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-content h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    color: var(--text-color);
+}
+
+.card-content p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    flex-grow: 1;
+    margin-bottom: 15px;
+}
+
+.card-footer {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* تفاصيل الخبر */
+.hidden {
+    display: none;
+}
+
+#article-details {
+    background-color: var(--card-bg);
+    padding: 30px 40px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-top: 20px;
+}
+
+.back-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 20px;
+    transition: background-color 0.3s;
+    text-decoration: none; /* لإزالة الخط تحت الرابط */
+    display: inline-block; /* ليعمل الـ padding بشكل صحيح */
+}
+
+.back-btn:hover {
+    background-color: #b0121f; /* درجة أغمق من الأحمر */
+}
+
+#article-content h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+#article-content img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+#article-content .meta-info {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+#article-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+/* تصميم أيقونات المشاركة */
+.share-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.share-section h3 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* أيقونات دائرية */
+    text-decoration: none;
+    color: white;
+    font-size: 1.5rem; /* حجم الأيقونة */
+    transition: transform 0.2s ease, opacity 0.2s;
+}
+
+.share-btn:hover {
+    transform: scale(1.1);
+    opacity: 0.9;
+}
+
+.whatsapp { background-color: #25D366; }
+.twitter-x { background-color: #000000; } /* لون X الجديد */
+.telegram { background-color: #24A1DE; }
+
+/* مؤشر التحميل */
+.loader {
+    border: 8px solid var(--border-color);
+    border-top: 8px solid var(--primary-color);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 50px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 40px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* تعديلات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .filters-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-form input {
+        width: 100%;
+    }
+
+    #article-details {
+        padding: 20px;
+    }
+
+    #article-content h1 {
+        font-size: 1.8rem;
+    }
+    /* تصميم رابط حقوق المطور */
+    .developer-credit {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .developer-credit a {
+        color: var(--primary-color); /* استخدام اللون الأحمر الرئيسي للموقع */
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .developer-credit a:hover {
+        text-decoration: underline;
+    }
+}

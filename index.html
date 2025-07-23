@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- العنوان الأساسي للمدونة -->
+    <title>lingramq8 - أخبار التقنية والألعاب</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <img src="logo.png" alt="شعار lingramq8" class="logo">
+        <h1>lingramq8</h1>
+    </div>
+</header>
+
+<main class="container">
+    <!-- قسم الفلاتر والبحث الجديد -->
+    <div class="filters-container">
+        <nav id="category-filters" class="category-filters">
+            <button class="filter-btn active" data-category="all">كل الأخبار</button>
+            <button class="filter-btn" data-category="tech">تقنية</button>
+            <button class="filter-btn" data-category="gaming">ألعاب الفيديو</button>
+            <button class="filter-btn" data-category="security">أمن سيبراني</button>
+            <button class="filter-btn" data-category="ai">ذكاء اصطناعي</button>
+        </nav>
+        <form id="search-form" class="search-form">
+            <input type="text" id="search-input" placeholder="ابحث في الأخبار...">
+            <button type="submit"><i class="fa fa-search"></i></button>
+        </form>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div id="main-content">
+        <div id="loader" class="loader"></div>
+        <div id="news-grid" class="news-grid">
+            <!-- سيتم ملء الأخبار هنا عبر JavaScript -->
+        </div>
+    </div>
+
+    <div id="article-details" class="hidden">
+        <button id="back-button" class="back-btn">← العودة للأخبار</button>
+        <article id="article-content">
+            <!-- سيتم ملء تفاصيل الخبر هنا -->
+        </article>
+    </div>
+</main>
+
+<footer>
+    <div class="container">
+        <p>© 2024 lingramq8. جميع الحقوق محفوظة.</p>
+        <!-- ==== السطر الجديد الذي تمت إضافته ==== -->
+        <p class="developer-credit">
+            Developed by <a href="https://www.olosolutions.cc/" target="_blank" rel="noopener noreferrer">Olosoluations</a>
+        </p>
+        <!-- ==== نهاية الإضافة ==== -->
+    </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
