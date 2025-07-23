@@ -9,25 +9,23 @@ export default async function handler(request, response) {
     }
 
     // =========================================================
-    // ==== قائمة الكلمات المفتاحية الموسعة (النسخة المعتمدة) ====
+    // ==== قائمة الكلمات المفتاحية (نسخة مختصرة تحت 500 حرف) ====
     // =========================================================
+    // قمنا باختصار القائمة مع الحفاظ على الكلمات الأهم
     const query = `
         (
-            "غوغل" OR "آبل" OR "مايكروسوفت" OR "ميتا" OR "نتفليكس" OR "تسلا" OR "OpenAI" OR
-            "بيكسل" OR "آيفون" OR "آيباد" OR "ChatGPT" OR "Grok" OR
-            "بلايستيشن" OR "اكسبوكس" OR "نينتندو" OR "ستيم" OR "PC gaming" OR "ألعاب فيديو" OR
-            "أمن سيبراني" OR "ثغرة" OR "اختراق" OR "تسريب بيانات" OR
-            "ذكاء اصطناعي" OR "الذكاء الاصطناعي التوليدي" OR
-            "هاتف ذكي" OR "تقنية" OR "تكنولوجيا" OR "عملة رقمية"
+            "غوغل" OR "آبل" OR "مايكروسوفت" OR "ميتا" OR "تسلا" OR "OpenAI" OR
+            "آيفون" OR "ChatGPT" OR "بلايستيشن" OR "اكسبوكس" OR "نينتندو" OR "ستيم" OR 
+            "ألعاب فيديو" OR "أمن سيبراني" OR "ثغرة" OR "اختراق" OR
+            "ذكاء اصطناعي" OR "تقنية" OR "تكنولوجيا" OR "عملة رقمية"
         ) 
         NOT (سياسة OR حرب OR اقتصاد OR رياضة)
     `;
 
-    // بناء رابط الطلب الكامل مع الكلمات المفتاحية الجديدة
+    // بناء رابط الطلب الكامل
     const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=ar&sortBy=publishedAt&apiKey=${apiKey}`;
 
     try {
-        // 3. إرسال الطلب إلى NewsAPI
         const newsResponse = await fetch(apiUrl);
 
         if (!newsResponse.ok) {
@@ -36,10 +34,8 @@ export default async function handler(request, response) {
             throw new Error(`خطأ من NewsAPI: ${errorBody.message || newsResponse.statusText}`);
         }
         
-        // 4. الحصول على بيانات الأخبار
         const newsData = await newsResponse.json();
         
-        // 5. إرسال البيانات للواجهة الأمامية مع التخزين المؤقت
         response.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
         response.status(200).json(newsData);
 
