@@ -13,7 +13,7 @@
 }
 
 body {
-    font-family: 'Poppins', 'Cairo', sans-serif; /* Poppins هو الأساس مع Cairo كبديل للعربية */
+    font-family: 'Poppins', 'Cairo', sans-serif;
     background-color: var(--light-bg);
     color: var(--text-color);
     margin: 0;
@@ -34,16 +34,21 @@ header {
 }
 
 .logo {
-    max-height: 70px; /* تحديد ارتفاع الشعار */
-    margin-bottom: 10px;
+    max-height: 80px; /* تكبير الشعار قليلاً */
+    margin-bottom: -20px; /* تقريب الشعار من العنوان الجديد */
 }
 
+/* ===== التعديل الرئيسي على العنوان ===== */
 header h1 {
-    margin: 0;
-    color: var(--primary-color);
-    font-size: 2.8rem;
-    font-weight: 700;
+    font-family: 'Orbitron', sans-serif; /* تطبيق الخط التقني الجديد */
+    font-size: 4.5rem;                  /* تكبير حجم الخط بشكل ملحوظ */
+    color: var(--primary-color);        /* استخدام اللون الرئيسي */
+    text-transform: uppercase;          /* جعل الحروف كبيرة لمظهر قوي */
+    margin: 10px 0 0 0;                 /* تعديل الهوامش لتناسب الشعار */
+    padding: 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15); /* إضافة ظل خفيف */
 }
+/* ===== نهاية التعديل ===== */
 
 /* حاوية الفلاتر والبحث */
 .filters-container {
@@ -105,8 +110,8 @@ header h1 {
     font-size: 0.9rem;
     outline: none;
     font-family: 'Poppins', sans-serif;
-    width: 200px; /* يمكن تعديله */
-    background-color: transparent; /* ليتماشى مع الخلفية */
+    width: 200px;
+    background-color: transparent;
 }
 
 .search-form button {
@@ -145,7 +150,7 @@ header h1 {
 
 .news-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 8px 30px rgba(216, 30, 44, 0.15); /* ظل بلون الشعار */
+    box-shadow: 0 8px 30px rgba(216, 30, 44, 0.15);
 }
 
 .news-card img {
@@ -176,9 +181,22 @@ header h1 {
 }
 
 .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-size: 0.8rem;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+}
+
+.source-name {
     color: var(--primary-color);
     font-weight: 600;
+}
+
+.publish-date {
+    color: var(--text-muted);
 }
 
 /* تفاصيل الخبر */
@@ -205,12 +223,12 @@ header h1 {
     font-family: 'Poppins', sans-serif;
     margin-bottom: 20px;
     transition: background-color 0.3s;
-    text-decoration: none; /* لإزالة الخط تحت الرابط */
-    display: inline-block; /* ليعمل الـ padding بشكل صحيح */
+    text-decoration: none;
+    display: inline-block;
 }
 
 .back-btn:hover {
-    background-color: #b0121f; /* درجة أغمق من الأحمر */
+    background-color: #b0121f;
 }
 
 #article-content h1 {
@@ -260,10 +278,10 @@ header h1 {
     justify-content: center;
     width: 50px;
     height: 50px;
-    border-radius: 50%; /* أيقونات دائرية */
+    border-radius: 50%;
     text-decoration: none;
     color: white;
-    font-size: 1.5rem; /* حجم الأيقونة */
+    font-size: 1.5rem;
     transition: transform 0.2s ease, opacity 0.2s;
 }
 
@@ -273,7 +291,7 @@ header h1 {
 }
 
 .whatsapp { background-color: #25D366; }
-.twitter-x { background-color: #000000; } /* لون X الجديد */
+.twitter-x { background-color: #000000; }
 .telegram { background-color: #24A1DE; }
 
 /* مؤشر التحميل */
@@ -300,12 +318,33 @@ footer {
     font-size: 0.9rem;
 }
 
+.developer-credit {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.developer-credit a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.developer-credit a:hover {
+    text-decoration: underline;
+}
+
 /* تعديلات للشاشات الصغيرة */
 @media (max-width: 768px) {
+    header h1 {
+        font-size: 3rem; /* تصغير حجم الخط قليلاً ليلائم الشاشات الصغيرة */
+    }
+
     .filters-container {
         flex-direction: column;
         align-items: stretch;
     }
+    
     .search-form input {
         width: 100%;
     }
@@ -317,40 +356,4 @@ footer {
     #article-content h1 {
         font-size: 1.8rem;
     }
-    /* تصميم رابط حقوق المطور */
-    .developer-credit {
-        margin-top: 8px;
-        font-size: 0.85rem;
-        color: var(--text-muted);
-    }
-
-    .developer-credit a {
-        color: var(--primary-color); /* استخدام اللون الأحمر الرئيسي للموقع */
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .developer-credit a:hover {
-        text-decoration: underline;
-    }
-    /* --- أضف هذا الكود في نهاية ملف style.css --- */
-
-.card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-    padding-top: 10px;
-    border-top: 1px solid var(--border-color);
-    margin-top: auto; /* يدفع الـ footer لأسفل البطاقة دائماً */
-}
-
-.source-name {
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-.publish-date {
-    color: var(--text-muted);
-}
 }
