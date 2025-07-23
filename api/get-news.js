@@ -8,7 +8,9 @@ export default async function handler(request, response) {
         return response.status(500).json({ error: 'مفتاح API غير معرف على الخادم.' });
     }
 
-    // ==== قائمة الكلمات المفتاحية (نسخة مختصرة تحت 500 حرف) ====
+    // =========================================================
+    // ==== قائمة الكلمات المفتاحية (نسخة نهائية ومفلترة بقوة) ====
+    // =========================================================
     const query = `
         (
             "غوغل" OR "آبل" OR "مايكروسوفت" OR "ميتا" OR "تسلا" OR "OpenAI" OR
@@ -19,9 +21,9 @@ export default async function handler(request, response) {
         NOT (
             سياسة OR حرب OR اقتصاد OR رياضة OR 
             غزة OR إسرائيل OR فلسطين OR الاحتلال OR قصف OR 
-            نتنياهو OR اسرائيل OR إيران OR سوريا OR الضفة OR حماس OR القدس
+            نتنياهو OR إيران OR سوريا OR الضفة OR حماس OR القدس
         )
-    ;
+    `;
 
     // بناء رابط الطلب الكامل
     const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=ar&sortBy=publishedAt&apiKey=${apiKey}`;
