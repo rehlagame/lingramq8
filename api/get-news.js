@@ -21,7 +21,7 @@ export default async function handler(request, response) {
             غزة OR إسرائيل OR فلسطين OR الاحتلال OR قصف OR 
             نتنياهو OR اسرائيل OR إيران OR سوريا OR الضفة OR حماس OR القدس
         )
-    `;
+    ;
 
     // بناء رابط الطلب الكامل
     const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=ar&sortBy=publishedAt&apiKey=${apiKey}`;
