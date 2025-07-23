@@ -333,4 +333,24 @@ footer {
     .developer-credit a:hover {
         text-decoration: underline;
     }
+    /* --- أضف هذا الكود في نهاية ملف style.css --- */
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto; /* يدفع الـ footer لأسفل البطاقة دائماً */
+}
+
+.source-name {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.publish-date {
+    color: var(--text-muted);
+}
 }
