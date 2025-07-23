@@ -1,3 +1,4 @@
+
 // هذا السطر يجعل الدالة قابلة للاستخدام بواسطة Vercel
 export default async function handler(request, response) {
 
@@ -8,9 +9,7 @@ export default async function handler(request, response) {
         return response.status(500).json({ error: 'مفتاح API غير معرف على الخادم.' });
     }
 
-    // =========================================================
-    // ==== قائمة الكلمات المفتاحية (نسخة نهائية ومفلترة بقوة) ====
-    // =========================================================
+    // ==== قائمة الكلمات المفتاحية (نسخة مختصرة تحت 500 حرف) ====
     const query = `
         (
             "غوغل" OR "آبل" OR "مايكروسوفت" OR "ميتا" OR "تسلا" OR "OpenAI" OR
@@ -18,11 +17,7 @@ export default async function handler(request, response) {
             "ألعاب فيديو" OR "أمن سيبراني" OR "ثغرة" OR
             "ذكاء اصطناعي" OR "تكنولوجيا" OR "عملة رقمية"
         ) 
-        NOT (
-            سياسة OR حرب OR اقتصاد OR رياضة OR 
-            غزة OR إسرائيل OR فلسطين OR الاحتلال OR قصف OR 
-            نتنياهو OR إيران OR سوريا OR الضفة OR حماس OR القدس
-        )
+        NOT (سياسة OR حرب OR اقتصاد OR رياضة)
     `;
 
     // بناء رابط الطلب الكامل
