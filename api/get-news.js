@@ -8,10 +8,7 @@ export default async function handler(request, response) {
         return response.status(500).json({ error: 'مفتاح API غير معرف على الخادم.' });
     }
 
-    // =========================================================
     // ==== قائمة الكلمات المفتاحية (نسخة مختصرة تحت 500 حرف) ====
-    // =========================================================
-    // قمنا باختصار القائمة مع الحفاظ على الكلمات الأهم
     const query = `
         (
             "غوغل" OR "آبل" OR "مايكروسوفت" OR "ميتا" OR "تسلا" OR "OpenAI" OR
@@ -27,18 +24,13 @@ export default async function handler(request, response) {
 
     try {
         const newsResponse = await fetch(apiUrl);
-
         if (!newsResponse.ok) {
             const errorBody = await newsResponse.json();
-            console.error('NewsAPI Error:', errorBody);
             throw new Error(`خطأ من NewsAPI: ${errorBody.message || newsResponse.statusText}`);
         }
-        
         const newsData = await newsResponse.json();
-        
         response.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate');
         response.status(200).json(newsData);
-
     } catch (error) {
         console.error('Internal Server Error:', error);
         response.status(500).json({ error: error.message });
