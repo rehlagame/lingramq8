@@ -23,8 +23,7 @@ export default async function handler(request, response) {
     `;
 
     // بناء رابط الطلب الكامل
-    const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=ar&sortBy=publishedAt&apiKey=${apiKey}`;
-
+    const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&language=ar&sortBy=publishedAt&pageSize=30&apiKey=${apiKey}`;
     try {
         const newsResponse = await fetch(apiUrl);
         if (!newsResponse.ok) {
