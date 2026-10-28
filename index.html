@@ -1,49 +1,259 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LingramQ8 - أخبار التقنية والألعاب</title>
+    <meta name="description" content="Lingram (لينجرام) - منصة إخبارية تقنية متطورة لعام 2026 تغطي الذكاء الاصطناعي، الأمن السيبراني، ألعاب الفيديو، وأحدث الابتكارات مع حفظ كامل لحقوق المصادر.">
+    <title>Lingram | نبض الأخبار التقنية والمستقبل</title>
 
-    <!-- Google Fonts: Poppins -->
+    <!-- الأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- الخطوط العربية والتقنية الحديثة -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
-
-    <!-- Defer JS to load after HTML -->
-    <script src="js/main.js" defer></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- إضاءات خلفية محيطية لتصميم 2026 -->
+<div class="ambient-bg" aria-hidden="true">
+    <div class="glow-orb orb-primary"></div>
+    <div class="glow-orb orb-accent"></div>
+    <div class="grid-overlay"></div>
+</div>
+
+<!-- شريط تقدم القراءة عند فتح خبر -->
+<div id="reading-progress" class="reading-progress" aria-hidden="true"></div>
+
+<!-- الهيدر الزجاجي العائم -->
 <header class="site-header">
-    <div class="container">
-        <a href="index.html" class="logo-container">
-            <img src="images/logo.PNG" alt="LingramQ8 Logo" class="logo-img">
-            <h1 class="logo-text">Lingram<span>Q8</span></h1>
+    <div class="container header-inner">
+        <a href="#" id="brand-home" class="brand" aria-label="العودة للرئيسية">
+            <div class="logo-wrapper">
+                <img src="logo.PNG" alt="شعار Lingram" class="logo">
+            </div>
+            <div class="brand-text">
+                <div class="brand-title-row">
+                    <h1>LINGRAM</h1>
+                    <span class="live-badge"><span class="pulse-dot"></span> نبض 2026</span>
+                </div>
+                <p class="brand-subtitle">منصة الرصد التقني والألعاب • مع حفظ حقوق المصادر</p>
+            </div>
         </a>
+
+        <div class="header-actions">
+            <button id="audio-brief-btn" class="action-pill audio-pill" title="استمع إلى موجز لأهم عناوين اليوم">
+                <i class="fa-solid fa-headphones-simple"></i>
+                <span>الموجز الصوتي</span>
+            </button>
+
+            <button id="saved-view-btn" class="action-pill" title="الأخبار المحفوظة للقراءة لاحقاً">
+                <i class="fa-regular fa-bookmark"></i>
+                <span>مكتبتي</span>
+                <span id="saved-count-badge" class="count-pill">0</span>
+            </button>
+
+            <button id="theme-toggle" class="icon-btn" aria-label="تبديل المظهر الداكن أو الفاتح" title="تبديل المظهر">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+        </div>
     </div>
 </header>
 
-<main class="container">
-    <!-- Loader will be shown while news are loading -->
-    <div class="loader-container" id="loader">
-        <div class="loader"></div>
+<!-- شريط النبض التقني والمواضيع المتداولة -->
+<section class="pulse-bar" aria-label="المواضيع التقنية المتداولة">
+    <div class="container pulse-inner">
+        <div class="pulse-label">
+            <i class="fa-solid fa-bolt"></i>
+            <span>الأكثر تداولاً:</span>
+        </div>
+        <div class="trending-tags" id="trending-tags">
+            <button class="tag-chip" data-tag="ذكاء اصطناعي">#الذكاء_الاصطناعي</button>
+            <button class="tag-chip" data-tag="ChatGPT">#ChatGPT</button>
+            <button class="tag-chip" data-tag="آبل">#آبل</button>
+            <button class="tag-chip" data-tag="بلايستيشن">#بلايستيشن</button>
+            <button class="tag-chip" data-tag="أمن سيبراني">#الأمن_السيبراني</button>
+            <button class="tag-chip" data-tag="ألعاب">#ألعاب_الفيديو</button>
+            <button class="tag-chip" data-tag="سامسونج">#سامسونج</button>
+        </div>
+        <div class="pulse-stats">
+            <span id="last-updated-text"><i class="fa-regular fa-clock"></i> تحديث لحظي</span>
+        </div>
+    </div>
+</section>
+
+<main class="container main-wrapper">
+
+    <!-- شريط الفلاتر والبحث المتقدم -->
+    <section class="filters-container" aria-label="تصنيف الأخبار والبحث">
+        <nav id="category-filters" class="category-filters">
+            <button class="filter-btn active" data-category="all">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>كل الأخبار</span>
+                <span class="cat-count" data-count-for="all">0</span>
+            </button>
+            <button class="filter-btn" data-category="tech">
+                <i class="fa-solid fa-microchip"></i>
+                <span>تقنية وأجهزة</span>
+                <span class="cat-count" data-count-for="tech">0</span>
+            </button>
+            <button class="filter-btn" data-category="ai">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>ذكاء اصطناعي</span>
+                <span class="cat-count" data-count-for="ai">0</span>
+            </button>
+            <button class="filter-btn" data-category="security">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>أمن سيبراني</span>
+                <span class="cat-count" data-count-for="security">0</span>
+            </button>
+            <button class="filter-btn" data-category="gaming">
+                <i class="fa-solid fa-gamepad"></i>
+                <span>ألعاب الفيديو</span>
+                <span class="cat-count" data-count-for="gaming">0</span>
+            </button>
+            <button class="filter-btn" data-category="saved">
+                <i class="fa-solid fa-bookmark"></i>
+                <span>المحفوظات</span>
+                <span class="cat-count" data-count-for="saved">0</span>
+            </button>
+        </nav>
+
+        <div class="search-and-sort">
+            <form id="search-form" class="search-form" role="search">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="search-input" placeholder="ابحث في العناوين، المصادر، أو المواضيع... (اضغط /)" autocomplete="off">
+                <button type="button" id="clear-search-btn" class="clear-search hidden" aria-label="مسح البحث">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <kbd class="search-shortcut" title="اضغط / للبحث السريع">/</kbd>
+            </form>
+
+            <div class="sort-wrapper">
+                <select id="sort-select" aria-label="ترتيب الأخبار">
+                    <option value="newest">الأحدث نشراً</option>
+                    <option value="source">حسب المصدر</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- المحتوى الرئيسي -->
+    <div id="main-content">
+
+        <!-- مؤشر التحميل الهيكلي (Skeleton Grid 2026) -->
+        <div id="loader" class="skeleton-wrapper">
+            <div class="skeleton-bento">
+                <div class="skeleton-card skeleton-hero"></div>
+                <div class="skeleton-side">
+                    <div class="skeleton-card skeleton-mini"></div>
+                    <div class="skeleton-card skeleton-mini"></div>
+                </div>
+            </div>
+            <div class="skeleton-grid">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+        </div>
+
+        <!-- شبكة بنتو للخبر الرئيسي وأبرز العناوين -->
+        <section id="bento-spotlight" class="bento-spotlight hidden" aria-label="أبرز أخبار اليوم"></section>
+
+        <!-- شريط معلومات النتائج والمصادر -->
+        <div id="results-bar" class="results-bar hidden">
+            <div class="results-info">
+                <span id="results-title">أحدث التغطيات التقنية</span>
+                <span id="results-counter" class="results-counter-pill"></span>
+            </div>
+            <div class="sources-attribution-mini">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>جميع الأخبار منسوبة لمصادرها الأصلية مع الروابط المباشرة</span>
+            </div>
+        </div>
+
+        <!-- شبكة الأخبار -->
+        <div id="news-grid" class="news-grid">
+            <!-- يتم ملء بطاقات الأخبار عبر JavaScript -->
+        </div>
     </div>
 
-    <!-- News articles will be injected here by JavaScript -->
-    <div class="news-grid" id="news-grid">
-        <!-- Cards will be generated by JS -->
-    </div>
+    <!-- عرض تفاصيل الخبر والملخص الذكي وحقوق المصدر -->
+    <section id="article-details" class="article-details-view hidden" aria-live="polite">
+        <div class="article-toolbar">
+            <button id="back-button" class="back-btn">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>العودة لتدفق الأخبار</span>
+            </button>
+
+            <div class="reader-controls">
+                <button id="listen-article-btn" class="tool-btn" title="استماع لنص الخبر">
+                    <i class="fa-solid fa-volume-high"></i>
+                    <span>استماع</span>
+                </button>
+                <button id="font-increase-btn" class="tool-btn" title="تكبير حجم الخط">A+</button>
+                <button id="font-decrease-btn" class="tool-btn" title="تصغير حجم الخط">A-</button>
+                <button id="bookmark-detail-btn" class="tool-btn" title="حفظ الخبر في مكتبتي">
+                    <i class="fa-regular fa-bookmark"></i>
+                    <span>حفظ</span>
+                </button>
+            </div>
+        </div>
+
+        <article id="article-content" class="article-reader-card">
+            <!-- يتم ملء تفاصيل الخبر وبطاقة المصدر وحقوق النشر هنا -->
+        </article>
+
+        <!-- أخبار ذات صلة -->
+        <div id="related-section" class="related-section hidden">
+            <h3 class="section-heading">
+                <i class="fa-solid fa-compass"></i>
+                <span>تغطيات ذات صلة قد تهمك</span>
+            </h3>
+            <div id="related-grid" class="related-grid"></div>
+        </div>
+    </section>
+
 </main>
 
+<!-- إشعار عائم (Toast) -->
+<div id="toast-notification" class="toast hidden" role="status" aria-live="polite"></div>
+
+<!-- الفوتر مع حفظ حقوق النشر والمصادر والمطور -->
 <footer class="site-footer">
     <div class="container">
-        <p>© 2025 LingramQ8. كل الحقوق محفوظة.</p>
+        <div class="footer-grid">
+            <div class="footer-brand-col">
+                <div class="footer-brand-header">
+                    <img src="logo.PNG" alt="شعار Lingram" class="footer-logo">
+                    <span>LINGRAM</span>
+                </div>
+                <p>منصة إخبارية تقنية حديثة تجمع لك أهم مستجدات التكنولوجيا، الذكاء الاصطناعي، الأمن السيبراني، وألعاب الفيديو في واجهة ذكية وسريعة.</p>
+            </div>
+
+            <div class="footer-sources-col">
+                <h4><i class="fa-solid fa-newspaper"></i> المصادر الإخبارية وحقوق الملكية الفكرية</h4>
+                <p class="copyright-disclaimer">
+                    تحترم مدونة <strong>Lingram (lingramq8)</strong> حقوق النشر والملكية الفكرية بشكل كامل. جميع العناوين، المقتطفات، والصور المعروضة هي ملك لمصادرها وناشريها الأصليين (مثل: البوابة العربية للأخبار التقنية، عالم التقنية، التقنية بلا حدود، سعودي جيمر، ترو جيمنج، عرب هاردوير، ومصادر NewsAPI المعتمدة). يتم ذكر اسم المصدر والكاتب بوضوح مع كل خبر وتوفير الرابط المباشر لقراءة المقال الكامل من موقعه الأصلي.
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 <strong>lingramq8</strong>. جميع الحقوق محفوظة للمنصة وللمصادر الإخبارية المذكورة.</p>
+            <p class="developer-credit">
+                Developed by <a href="https://www.olosolutions.cc/" target="_blank" rel="noopener noreferrer">Olosoluations</a>
+            </p>
+        </div>
     </div>
 </footer>
 
+<script src="script.js"></script>
 </body>
 </html>
